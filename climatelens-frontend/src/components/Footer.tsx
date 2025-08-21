@@ -11,13 +11,6 @@ const Footer = () => {
             </div>
             <span className="text-lg font-semibold text-foreground">ClimateLens</span>
           </div>
-
-          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-            <span>Made with</span>
-            <Heart className="h-4 w-4 text-accent fill-current" />
-            <span>for climate awareness</span>
-          </div>
-
           <div className="text-sm text-muted-foreground mt-4 md:mt-0">
             © 2024 ClimateLens. Know before you buy.
           </div>
