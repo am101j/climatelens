@@ -4,4 +4,4 @@ ClimateLens is a GPT-5 Hackathon project. This app helps property buyers check c
 
 For full setup and details, see the frontend and backend README files.
 
- Video Demo: [(https://drive.google.com/file/d/1F_RLpLmQ7NBih4WFVW44x1K584m0Yzx9/view?usp=sharing)]
+ Video Demo: (https://drive.google.com/file/d/1F_RLpLmQ7NBih4WFVW44x1K584m0Yzx9/view?usp=sharing)
