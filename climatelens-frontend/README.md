@@ -31,14 +31,15 @@
 
 - Mock risk report preview with charts:
 
+---
 
 # Installation
 
 Clone the repository:
-
-git clone <your-repo-url>
-cd frontend
-
+```bash
+git clone <https://github.com/Aroobmushtaq/climatelens>
+cd climatelens-frontend
+```
 
 ## Install dependencies:
 
@@ -50,6 +51,7 @@ npm install
 ```bash
 npm run dev
 ```
+---
 
 # Usage
 

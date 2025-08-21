@@ -10,7 +10,7 @@ This backend is built with **FastAPI** and currently uses **mock data** for clim
 ## 1. Clone the repository: 
 
 ```bash
-git clone <repo-url>
+git clone <https://github.com/Aroobmushtaq/climatelens>
 cd climatelens-backend
 ```
 
