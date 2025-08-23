@@ -13,6 +13,7 @@ import { fetchPreview, downloadFullReport, type ClimatePreview } from "@/service
 const Report = () => {
   const [address, setAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false); // New state for download loading
   const [preview, setPreview] = useState<ClimatePreview | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const { toast } = useToast();
@@ -56,6 +57,7 @@ const Report = () => {
       return;
     }
 
+    setIsDownloading(true); // Set downloading to true
     try {
       await downloadFullReport(preview.address);
       toast({
@@ -68,6 +70,8 @@ const Report = () => {
         description: "Please try again or contact support.",
         variant: "destructive",
       });
+    } finally {
+      setIsDownloading(false); // Reset downloading state
     }
   };
 
@@ -170,10 +174,20 @@ const Report = () => {
 
               <Button
                 onClick={handleDownloadReport}
+                disabled={isDownloading} // Disable button during download
                 className="w-full rounded-full bg-gradient-primary border-0 shadow-soft hover:shadow-floating transition-all duration-300"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Download Full Report (PDF)
+                {isDownloading ? ( // Show loading indicator
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Downloading...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Full Report (PDF)
+                  </div>
+                )}
               </Button>
             </Card>
 
