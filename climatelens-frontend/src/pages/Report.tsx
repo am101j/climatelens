@@ -14,11 +14,9 @@ import { fetchPreview, downloadFullReport, type ClimatePreview } from "@/service
 const Report = () => {
   const [address, setAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false); // New state for download loading
-  const [downloadProgressMessage, setDownloadProgressMessage] = useState("Downloading..."); // New state for progress message
-  const [downloadProgressValue, setDownloadProgressValue] = useState(0); // New state for progress bar value
-  const colors = ['bg-blue-500', 'bg-green-500', 'bg-orange-500']; // Tailwind CSS classes for colors
-  const [colorIndex, setColorIndex] = useState(0); // State to track current color index
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgressMessage, setDownloadProgressMessage] = useState("Downloading...");
+  const [downloadProgressValue, setDownloadProgressValue] = useState(0);
   const [preview, setPreview] = useState<ClimatePreview | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const { toast } = useToast();
@@ -43,7 +41,7 @@ const Report = () => {
           description: "Your climate risk preview is ready.",
         });
         setIsLoading(false);
-      }, 500); // Slight delay for preview to show up
+      }, 500);
     } catch (error) {
       toast({
         title: "Error",
@@ -57,15 +55,15 @@ const Report = () => {
   const handleDownloadReport = async () => {
     if (!preview) return;
 
-    const isPaid = localStorage.getItem('paid') === 'true';
-    
+    const isPaid = localStorage.getItem("paid") === "true";
     if (!isPaid) {
       setShowPaywall(true);
       return;
     }
 
-    setIsDownloading(true); // Set downloading to true
+    setIsDownloading(true);
     setDownloadProgressMessage("Fetching relevant info...");
+    setDownloadProgressValue(0);
 
     const messages = [
       "Using intelligent GPT-5 AI...",
@@ -81,12 +79,12 @@ const Report = () => {
       if (messageIndex < messages.length) {
         setDownloadProgressMessage(messages[messageIndex]);
         progress += progressIncrement;
-        setDownloadProgressValue(Math.min(progress, 100)); // Ensure progress doesn't exceed 100
+        setDownloadProgressValue(Math.min(progress, 100));
         messageIndex++;
       } else {
         clearInterval(interval);
       }
-    }, 1500); // Change message every 1.5 seconds
+    }, 1500);
 
     try {
       await downloadFullReport(preview.address);
@@ -101,33 +99,30 @@ const Report = () => {
         variant: "destructive",
       });
     } finally {
-      clearInterval(interval); // Clear interval if download finishes early or fails
-      setIsDownloading(false); // Reset downloading state
-      setDownloadProgressValue(0); // Reset progress bar value
-      setDownloadProgressMessage("Download Full Report (PDF)"); // Reset message
+      clearInterval(interval);
+      setIsDownloading(false);
+      setDownloadProgressValue(0);
+      setDownloadProgressMessage("Download Full Report (PDF)");
     }
   };
 
   const handlePaymentSuccess = () => {
-    if (preview) {
-      handleDownloadReport();
-    }
+    if (preview) handleDownloadReport();
   };
 
   const getRiskColor = (level: string) => {
     const colors = {
-      'Low': 'text-green-600',
-      'Medium': 'text-yellow-600',
-      'Moderate': 'text-orange-600',
-      'High': 'text-red-600'
+      Low: "text-green-600",
+      Medium: "text-yellow-600",
+      Moderate: "text-orange-600",
+      High: "text-red-600",
     };
-    return colors[level as keyof typeof colors] || 'text-gray-600';
+    return colors[level as keyof typeof colors] || "text-gray-600";
   };
 
   return (
     <div className="min-h-screen bg-gradient-hero">
       <NavBar />
-      
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-foreground mb-4">
@@ -143,15 +138,19 @@ const Report = () => {
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold text-foreground">Property Address</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                Property Address
+              </h2>
             </div>
-            
+
             <div className="flex gap-4">
               <Input
                 placeholder="Enter property address (e.g., 123 Main St, City, State)"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleGenerateReport()}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && handleGenerateReport()
+                }
                 className="flex-1 rounded-full border-primary/20 focus:border-primary bg-background/50"
               />
               <Button
@@ -191,8 +190,14 @@ const Report = () => {
                   </p>
                 </div>
                 <div className="text-center">
-                  <div className="text-sm text-muted-foreground mb-1">Overall Risk</div>
-                  <div className={`text-2xl font-bold ${getRiskColor(preview.overallRisk)}`}>
+                  <div className="text-sm text-muted-foreground mb-1">
+                    Overall Risk
+                  </div>
+                  <div
+                    className={`text-2xl font-bold ${getRiskColor(
+                      preview.overallRisk
+                    )}`}
+                  >
                     {preview.overallRisk}
                   </div>
                 </div>
@@ -201,16 +206,18 @@ const Report = () => {
               <div className="bg-muted/30 rounded-xl p-6 mb-6">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-accent flex-shrink-0 mt-0.5" />
-                  <p className="text-foreground leading-relaxed">{preview.summary}</p>
+                  <p className="text-foreground leading-relaxed">
+                    {preview.summary}
+                  </p>
                 </div>
               </div>
 
               <Button
                 onClick={handleDownloadReport}
-                disabled={isDownloading} // Disable button during download
+                disabled={isDownloading}
                 className="w-full rounded-full bg-gradient-primary border-0 shadow-soft hover:shadow-floating transition-all duration-300"
               >
-                {isDownloading ? ( // Show loading indicator
+                {isDownloading ? (
                   <div className="flex flex-col items-center gap-2 w-full">
                     <div className="flex items-center gap-2">
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
@@ -230,15 +237,28 @@ const Report = () => {
             {/* Risk Breakdown */}
             <div className="grid lg:grid-cols-2 gap-8">
               <Card className="p-8 bg-gradient-card shadow-card border-0 rounded-2xl">
-                <h3 className="text-xl font-semibold text-foreground mb-6">Risk Levels</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-6">
+                  Risk Levels
+                </h3>
                 <div className="space-y-4">
                   {preview.risks.map((risk) => (
-                    <div key={risk.name} className="flex items-center justify-between p-4 bg-muted/20 rounded-xl">
-                      <span className="font-medium text-foreground">{risk.name}</span>
+                    <div
+                      key={risk.name}
+                      className="flex items-center justify-between p-4 bg-muted/20 rounded-xl"
+                    >
+                      <span className="font-medium text-foreground">
+                        {risk.name}
+                      </span>
                       <div className="flex items-center gap-3">
                         <div className="text-right">
-                          <div className="text-sm text-muted-foreground">{risk.value}%</div>
-                          <div className={`text-sm font-medium ${getRiskColor(risk.level)}`}>
+                          <div className="text-sm text-muted-foreground">
+                            {risk.value}%
+                          </div>
+                          <div
+                            className={`text-sm font-medium ${getRiskColor(
+                              risk.level
+                            )}`}
+                          >
                             {risk.level}
                           </div>
                         </div>
@@ -249,13 +269,17 @@ const Report = () => {
               </Card>
 
               <Card className="p-8 bg-gradient-card shadow-card border-0 rounded-2xl">
-                <h3 className="text-xl font-semibold text-foreground mb-6">Risk Visualization</h3>
+                <h3 className="text-xl font-semibold text-foreground mb-6">
+                  Risk Visualization
+                </h3>
                 <RiskChart data={preview.risks} type="bar" />
               </Card>
             </div>
 
             <Card className="p-8 bg-gradient-card shadow-card border-0 rounded-2xl">
-              <h3 className="text-xl font-semibold text-foreground mb-6">Risk Distribution</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-6">
+                Risk Distribution
+              </h3>
               <RiskChart data={preview.risks} type="pie" />
             </Card>
           </div>
