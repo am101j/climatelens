@@ -14,6 +14,7 @@ app = FastAPI(title="ClimateLens API")
 # ------------------- CORS Setup -------------------
 origins = [
     "http://localhost:5173",  # Vite frontend
+    "https://climatelens.vercel.app",
     "http://localhost:8080",
     "http://127.0.0.1:8080",
 ]
