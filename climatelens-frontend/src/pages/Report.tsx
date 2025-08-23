@@ -31,18 +31,20 @@ const Report = () => {
     setIsLoading(true);
     try {
       const data = await fetchPreview(address);
-      setPreview(data);
-      toast({
-        title: "Report Generated!",
-        description: "Your climate risk preview is ready.",
-      });
+      setTimeout(() => {
+        setPreview(data);
+        toast({
+          title: "Report Generated!",
+          description: "Your climate risk preview is ready.",
+        });
+        setIsLoading(false);
+      }, 500); // Slight delay for preview to show up
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to generate report. Please try again.",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
