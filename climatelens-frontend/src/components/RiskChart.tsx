@@ -63,14 +63,13 @@ const RiskChart = ({ data, type = 'bar' }: RiskChartProps) => {
           <Bar 
             dataKey="value" 
             radius={[8, 8, 0, 0]}
-            fill="url(#gradient)"
-          />
-          <defs>
-            <linearGradient id="gradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--primary))" />
-              <stop offset="100%" stopColor="hsl(var(--primary-soft))" />
-            </linearGradient>
-          </defs>
+          >
+            {
+              data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={riskColors[entry.level as keyof typeof riskColors]} />
+              ))
+            }
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     </div>
