@@ -197,10 +197,10 @@ async def fetch_climate_preview(address: str) -> ClimatePreview:
         overallRisk="Moderate",
         summary=f"Based on our analysis of {address}, this location shows moderate climate risks.",
         risks=[
-            RiskItem(name="Flood Risk", value=20, level="High"),
-            RiskItem(name="Air Quality", value=20, level="Moderate"),
-            RiskItem(name="Heat Risk", value=20, level="Medium"),
-            RiskItem(name="Wildfire Hazard", value=20, level="Low"),
+            RiskItem(name="Flood Risk", value=25, level="Moderate"),
+            RiskItem(name="Air Quality", value=15, level="Moderate"),
+            RiskItem(name="Heat Risk", value=30, level="High"),
+            RiskItem(name="Wildfire Hazard", value=10, level="Low"),
             RiskItem(name="Wind Damage", value=20, level="Medium")
         ]
     )

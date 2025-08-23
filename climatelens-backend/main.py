@@ -44,7 +44,11 @@ async def get_preview(request: AddressRequest):
 # ------------------- Download PDF -------------------
 @app.get("/report/download")
 async def download_report(address: str):
-    pdf_buffer = await generate_pdf_report_service(address)
+    try:
+        pdf_buffer = await generate_pdf_report_service(address)
+    except Exception as e:
+        # Catch *real* cause and forward it to frontend
+        raise HTTPException(status_code=500, detail=str(e))
     
     headers = {
         'Content-Disposition': f'attachment; filename="{address}_ClimateReport.pdf"'

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Search, Download, MapPin, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import NavBar from "@/components/NavBar";
@@ -14,6 +15,10 @@ const Report = () => {
   const [address, setAddress] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false); // New state for download loading
+  const [downloadProgressMessage, setDownloadProgressMessage] = useState("Downloading..."); // New state for progress message
+  const [downloadProgressValue, setDownloadProgressValue] = useState(0); // New state for progress bar value
+  const colors = ['bg-blue-500', 'bg-green-500', 'bg-orange-500']; // Tailwind CSS classes for colors
+  const [colorIndex, setColorIndex] = useState(0); // State to track current color index
   const [preview, setPreview] = useState<ClimatePreview | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const { toast } = useToast();
@@ -60,6 +65,29 @@ const Report = () => {
     }
 
     setIsDownloading(true); // Set downloading to true
+    setDownloadProgressMessage("Fetching relevant info...");
+
+    const messages = [
+      "Using intelligent GPT-5 AI...",
+      "Forming the perfect report...",
+      "Almost there...",
+      "Finalizing report...",
+    ];
+    let messageIndex = 0;
+    let progress = 0;
+    const progressIncrement = 100 / messages.length;
+
+    const interval = setInterval(() => {
+      if (messageIndex < messages.length) {
+        setDownloadProgressMessage(messages[messageIndex]);
+        progress += progressIncrement;
+        setDownloadProgressValue(Math.min(progress, 100)); // Ensure progress doesn't exceed 100
+        messageIndex++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 1500); // Change message every 1.5 seconds
+
     try {
       await downloadFullReport(preview.address);
       toast({
@@ -73,7 +101,10 @@ const Report = () => {
         variant: "destructive",
       });
     } finally {
+      clearInterval(interval); // Clear interval if download finishes early or fails
       setIsDownloading(false); // Reset downloading state
+      setDownloadProgressValue(0); // Reset progress bar value
+      setDownloadProgressMessage("Download Full Report (PDF)"); // Reset message
     }
   };
 
@@ -129,9 +160,9 @@ const Report = () => {
                 className="rounded-full bg-gradient-primary border-0 shadow-soft hover:shadow-floating transition-all duration-300"
               >
                 {isLoading ? (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Analyzing...
+                    <Progress value={50} className="w-full h-2" />
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
@@ -180,9 +211,12 @@ const Report = () => {
                 className="w-full rounded-full bg-gradient-primary border-0 shadow-soft hover:shadow-floating transition-all duration-300"
               >
                 {isDownloading ? ( // Show loading indicator
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    Downloading...
+                  <div className="flex flex-col items-center gap-2 w-full">
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      {downloadProgressMessage}
+                    </div>
+                    <Progress value={downloadProgressValue} className="w-full h-2" />
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
