@@ -188,57 +188,21 @@ def _map_risk_to_level(value: float, thresholds: list) -> str:
     return "High"
 
 async def fetch_climate_preview(address: str) -> ClimatePreview:
-    """Fetches climate preview data for the UI."""
-    logging.info(f"[{address}] Starting fetch_climate_preview...")
-    coords = await get_coordinates_for_address(address)
-    lat, lon = coords["lat"], coords["lon"]
-
-    logging.info(f"[{address}] Fetching preview data for lat={lat}, lon={lon}...")
-    results = await asyncio.gather(
-        api_client.get_risk_score(lat, lon),
-        api_client.get_flood_zone_current(lat, lon),
-        api_client.get_wildfire_current(lat, lon),
-        api_client.get_air_quality_daily(lat, lon),
-        return_exceptions=True
-    )
-    risk_score_data, flood_zone_data, wildfire_data, aq_data = results
-    logging.info(f"[{address}] Preview data fetched. Processing...")
-    logging.info(f"risk_score_data type: {type(risk_score_data)}, content: {risk_score_data}")
-    logging.info(f"flood_zone_data type: {type(flood_zone_data)}, content: {flood_zone_data}")
-    logging.info(f"wildfire_data type: {type(wildfire_data)}, content: {wildfire_data}")
-    logging.info(f"aq_data type: {type(aq_data)}, content: {aq_data}")
-
-    risks = []
-    overall_risk_value = 0
-
-    # Process risk scores
-    if isinstance(risk_score_data, dict) and 'scores' in risk_score_data:
-        scores = risk_score_data['scores']
-        if scores:
-            overall_risk_value = sum(scores.values()) / len(scores)
-        else:
-            overall_risk_value = 0
-        risks.append(RiskItem(name="Overall Composite Risk", value=overall_risk_value, level=_map_risk_to_level(overall_risk_value, [25, 50, 75])))
-
-    if isinstance(flood_zone_data, dict):
-        in_zone = flood_zone_data.get('in_flood_zone', False)
-        risks.append(RiskItem(name="Flood Risk", value=100 if in_zone else 0, level="High" if in_zone else "Low"))
-
-    if isinstance(wildfire_data, dict):
-        wildfire_risk = wildfire_data.get('wildfire_risk_score', 0)
-        risks.append(RiskItem(name="Wildfire Hazard", value=wildfire_risk, level=_map_risk_to_level(wildfire_risk, [25, 50, 75])))
-
-    if isinstance(aq_data, dict) and aq_data.get('time_series'):
-        latest_aqi = aq_data['time_series'][-1].get('aqi', 0)
-        risks.append(RiskItem(name="Air Quality", value=latest_aqi, level=_map_risk_to_level(latest_aqi, [50, 100, 150])))
-
-    summary = f"This is a preliminary, API-driven climate risk analysis for {address}. Further analysis, including future climate scenarios and detailed narratives, will be provided by the full GPT-5 powered report."
-
+    """
+    Mock data to simulate climate risk preview.
+    Replace this with GPT-5 API call later.
+    """
     return ClimatePreview(
         address=address,
-        overallRisk=_map_risk_to_level(overall_risk_value, [25, 50, 75]),
-        summary=summary,
-        risks=risks
+        overallRisk="Moderate",
+        summary=f"Based on our analysis of {address}, this location shows moderate climate risks.",
+        risks=[
+            RiskItem(name="Flood Risk", value=20, level="High"),
+            RiskItem(name="Air Quality", value=20, level="Moderate"),
+            RiskItem(name="Heat Risk", value=20, level="Medium"),
+            RiskItem(name="Wildfire Hazard", value=20, level="Low"),
+            RiskItem(name="Wind Damage", value=20, level="Medium")
+        ]
     )
 
 async def generate_pdf_report_service(address: str) -> BytesIO:

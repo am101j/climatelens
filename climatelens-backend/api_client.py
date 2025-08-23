@@ -27,29 +27,29 @@ async def _get(path, params=None, stream=False):
 
 # 1) Composite risk (AQ, flood, wildfire)
 async def get_risk_score(lat: float, lon: float):
-    return await _aget("/api/climate_risk/risk_score", {"latitude": lat, "longitude": lon})
+    return await _get("/api/climate_risk/risk_score", {"latitude": lat, "longitude": lon})
 
 # 2) Air quality time-series (daily & monthly)
 async def get_air_quality_daily(lat: float, lon: float):
-    return await _aget("/api/airquality/timeseries-daily", {"latitude": lat, "longitude": lon})
+    return await _get("/api/airquality/timeseries-daily", {"latitude": lat, "longitude": lon})
 
 async def get_air_quality_monthly(lat: float, lon: float):
-    return await _aget("/api/airquality/timeseries-monthly", {"latitude": lat, "longitude": lon})
+    return await _get("/api/airquality/timeseries-monthly", {"latitude": lat, "longitude": lon})
 
 # 3) Flood zone boolean
 async def get_flood_zone_current(lat: float, lon: float):
-    return await _aget("/api/flood/zone-current", {"latitude": lat, "longitude": lon})
+    return await _get("/api/flood/zone-current", {"latitude": lat, "longitude": lon})
 
 # 4) Wildfire current and timeseries
 async def get_wildfire_current(lat: float, lon: float):
-    return await _aget("/api/wildfire/risk-current", {"latitude": lat, "longitude": lon})
+    return await _get("/api/wildfire/risk-current", {"latitude": lat, "longitude": lon})
 
 async def get_wildfire_timeseries(lat: float, lon: float):
-    return await _aget("/api/wildfire/timeseries", {"latitude": lat, "longitude": lon})
+    return await _get("/api/wildfire/timeseries", {"latitude": lat, "longitude": lon})
 
 # 5) Heat/Wind: daily & climate scenarios time series
 async def get_heat_wind_daily(lat: float, lon: float):
-    return await _aget("/api/heat-wind/daily", {"latitude": lat, "longitude": lon})
+    return await _get("/api/heat-wind/daily", {"latitude": lat, "longitude": lon})
 
 async def get_heat_wind_timeseries(lat: float, lon: float):
     return await _get("/api/heat-wind/timeseries", {"latitude": lat, "longitude": lon})
