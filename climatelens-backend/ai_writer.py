@@ -1,4 +1,3 @@
-
 import logging
 import json
 import os
@@ -6,9 +5,9 @@ from openai import OpenAI
 
 logging.basicConfig(level=logging.INFO)
 
-DEFAULT_MODEL = "gpt-4-turbo-preview"
+DEFAULT_MODEL = "gpt-5"
 
-SYSTEM_PROMPT = '''
+SYSTEM_PROMPT = """
 You are a world-class climate-risk and ESG consultant producing reports for high-value residential properties.
 You should use plain language and NOT any links or reference URLs.
 STRICT SCHEMA (MUST FOLLOW EXACTLY):
@@ -72,7 +71,7 @@ RULES:
 4. Bullets: optional, 3–5 bullets if present.
 5. Charts: choose from ["risk_bar","aq_gauges","wildfire_ts","heatwind_scen","recent_daily"] and no repeats.
 6. Output ONLY JSON. DO NOT add any explanation or text outside the JSON.
-'''
+"""
 
 AVAILABLE_CHARTS = ["risk_bar", "aq_gauges", "wildfire_ts", "heatwind_scen", "recent_daily"]
 
@@ -84,7 +83,7 @@ def _build_prompt(lat, lon, address, risk_score, flood_zone, wildfire_now, **kwa
 
     chart_text = "Charts guidance:\n" + "\n".join(chart_info) if chart_info else ""
 
-    return f'''
+    return f"""
 {SYSTEM_PROMPT}
 
 Generate a report for the property at:
@@ -102,25 +101,22 @@ Key Data:
 {chart_text}
 
 **CRITICAL:** Output must be a single valid JSON object strictly following the schema above, with no extra text, no URLs, and no deviations.
-'''
+"""
 
 class AIWriter:
     def __init__(self, openai_api_key: str = None):
         self.client = OpenAI(api_key=openai_api_key or os.environ.get("OPENAI_API_KEY"))
 
     def _call_openai(self, prompt: str) -> str:
-        logging.info("Calling OpenAI API...")
+        logging.info("Calling GPT-5 API...")
         try:
-            response = self.client.chat.completions.create(
+            response = self.client.responses.create(
                 model=DEFAULT_MODEL,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={"type": "json_object"}
+                tools=[{"type": "web_search_preview"}],
+                input=prompt
             )
-            output_text = response.choices[0].message.content
-            logging.info("OpenAI response received.")
+            output_text = response.output_text
+            logging.info("GPT-5 response received.")
             return output_text
         except Exception as e:
             logging.error(f"OpenAI API call failed: {e}")
@@ -132,11 +128,12 @@ class AIWriter:
 
       try:
           parsed_json = json.loads(raw_output)
-          logging.info("OpenAI JSON parsed successfully.")
+          logging.info("GPT-5 JSON parsed successfully.")
       except json.JSONDecodeError as e:
           logging.error(f"Failed to parse JSON: {e}\nRaw output:\n{raw_output}")
-          raise ValueError("OpenAI returned invalid JSON") from e
+          raise ValueError("GPT-5 returned invalid JSON") from e
 
+      # Validate top-level sections and subsections
       required_sections = ["executive_summary", "market_analysis", "climate_and_esg_risks", "final_verdict"]
       for sec in required_sections:
           if sec not in parsed_json:
@@ -144,6 +141,7 @@ class AIWriter:
           if "title" not in parsed_json[sec] or "subsections" not in parsed_json[sec]:
               raise ValueError(f"Section '{sec}' missing 'title' or 'subsections'")
 
+      # Deduplicate charts globally across all subsections
       used_charts = set()
       for sec in required_sections:
           for sub in parsed_json[sec]["subsections"]:
@@ -151,7 +149,9 @@ class AIWriter:
                   raise ValueError(f"A subsection in '{sec}' is missing 'subtitle' or 'paragraphs'")
               
               if "charts" in sub:
+                  # Keep only allowed charts
                   sub["charts"] = [c for c in sub["charts"] if c in AVAILABLE_CHARTS]
+                  # Keep charts not already used in other subsections
                   new_charts = []
                   for c in sub["charts"]:
                       if c not in used_charts:
@@ -159,5 +159,6 @@ class AIWriter:
                           used_charts.add(c)
                   sub["charts"] = new_charts
 
-      logging.info("OpenAI JSON validated successfully with unique charts across subsections.")
+      logging.info("GPT-5 JSON validated successfully with unique charts across subsections.")
       return parsed_json
+

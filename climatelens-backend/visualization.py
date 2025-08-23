@@ -1,4 +1,3 @@
-
 import os
 import tempfile
 import matplotlib.pyplot as plt
@@ -89,6 +88,7 @@ def plot_air_quality_gauges(aq_data) -> str:
 def plot_wildfire_timeseries(api_data) -> str:
     wf_ts = api_data.get("wildfire_risk_timeseries_data", {})
     df = pd.DataFrame(wf_ts).T
+    # Remove latitude and longitude columns if they exist
     if "latitude" in df.columns:
         df = df.drop(columns=["latitude"])
     if "longitude" in df.columns:
@@ -101,7 +101,6 @@ def plot_wildfire_timeseries(api_data) -> str:
         return _save_current_fig("Wildfire Danger Days per Year")
 
     df = df.melt(id_vars="year", var_name="danger_level", value_name="days")
-    df['days'] = pd.to_numeric(df['days'], errors='coerce')
 
     plt.figure(figsize=(10, 6))
     ax = sns.lineplot(
@@ -129,14 +128,15 @@ def plot_heat_wind_scenarios(api_data) -> str:
     if df.empty:
         return _save_current_fig("Heat & Wind Climate Scenarios")
 
+    # Remove 'daily max temperature' scenarios as per API documentation
     if 'daily max temperature rcp45(K)' in df.columns:
         df = df.drop(columns=['daily max temperature rcp45(K)'])
     if 'daily max temperature rcp85(K)' in df.columns:
         df = df.drop(columns=['daily max temperature rcp85(K)'])
 
     df = df.melt(id_vars="year", var_name="scenario", value_name="days")
-    df['days'] = pd.to_numeric(df['days'], errors='coerce')
 
+    # Filter to plot only one of each heatwaves, consecutive dry days, and extreme wind speed
     desired_scenarios = [
         'heatwaves_rcp45',
         'consecutive_dry_days_rcp45',
@@ -176,15 +176,16 @@ def plot_recent_daily_weather(hw_daily) -> str:
     if df.empty:
         return _save_current_fig("Recent Daily Weather (Last 30 Days)")
 
+    # Remove 'year' column as per API documentation
     if 'year' in df.columns:
         df = df.drop(columns=['year'])
 
+    # Remove '2m temperature(K)' column as per user request
     if '2m temperature(K)' in df.columns:
         df = df.drop(columns=['2m temperature(K)'])
 
     df["date"] = pd.to_datetime(df["date"])
     df = df.melt(id_vars="date", var_name="measurement", value_name="value")
-    df['value'] = pd.to_numeric(df['value'], errors='coerce')
 
     plt.figure(figsize=(12, 6))
     ax = sns.lineplot(
@@ -197,6 +198,7 @@ def plot_recent_daily_weather(hw_daily) -> str:
         lw=2
     )
 
+    # Format x-axis to show month & day only
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
     plt.xticks(rotation=45, ha="right")
     ax.set_xlabel("Date", fontsize=12)
