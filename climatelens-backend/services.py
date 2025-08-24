@@ -147,7 +147,7 @@ def build_pdf(lat, lon, address, overall_risk_value, risks: list, charts: dict, 
 
     logging.info("Encoding PDF to bytes...")
     try:
-        pdf_bytes = pdf.output(dest='S').encode('latin1')
+        pdf_bytes = pdf.output(dest='S').encode('latin1') if isinstance(pdf.output(dest='S'), str) else pdf.output(dest='S')
         buf = BytesIO(pdf_bytes)
         buf.seek(0)
         logging.info("PDF built successfully.")
