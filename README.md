@@ -4,6 +4,17 @@
 
 > AI-powered climate risk analysis and reporting.
 
+<<<<<<< HEAD
+=======
+ Video Demo: (https://drive.google.com/file/d/1F_RLpLmQ7NBih4WFVW44x1K584m0Yzx9/view?usp=sharing)
+ 
+ # ClimateLens
+
+![ClimateLens Logo](climatelens-backend/assets/ClimateLens%20Logo.png)
+
+> AI-powered climate risk analysis and reporting.
+
+>>>>>>> 50b7a5ddfb476a5d2443fe0a76ffa256ad6b7315
 ClimateLens is a full-stack web application designed to provide users with detailed climate risk reports for any location. It leverages AI to analyze data and generate insightful summaries, accompanied by clear data visualizations.
 
 ## Features
@@ -108,4 +119,8 @@ Follow these instructions to set up and run the project locally.
 
 ## License
 
+<<<<<<< HEAD
 This project is licensed under the MIT License. Consider adding a `LICENSE` file to the repository.
+=======
+This project is licensed under the MIT License. Consider adding a `LICENSE` file to the repository.
+>>>>>>> 50b7a5ddfb476a5d2443fe0a76ffa256ad6b7315
