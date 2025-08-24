@@ -157,7 +157,7 @@ def build_pdf(lat, lon, address, overall_risk_value, risks: list, charts: dict, 
         raise
 
 # --- Data Fetching and Processing ---
-
+'''
 async def get_coordinates_for_address(address: str) -> dict:
     """Geocodes an address using the Nominatim OpenStreetMap API."""
     url = "https://nominatim.openstreetmap.org/search"
@@ -176,6 +176,22 @@ async def get_coordinates_for_address(address: str) -> dict:
         except (httpx.RequestError, httpx.HTTPStatusError, ValueError) as e:
             logging.error(f"Geocoding failed: {e}")
             raise RuntimeError(f"Geocoding failed for address '{address}'.") from e
+        
+    '''
+
+async def get_coordinates_for_address(address: str) -> dict:
+    url = "https://api.opencagedata.com/geocode/v1/json"
+    params = {"q": address, "key": os.getenv("OPENCAGE_API_KEY")}
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, params=params, timeout=10.0)
+        response.raise_for_status()
+        data = response.json()
+        if data["results"]:
+            coords = data["results"][0]["geometry"]
+            return {"lat": coords["lat"], "lon": coords["lng"]}
+        else:
+            raise ValueError("No results found")
+
 
 def _map_risk_to_level(value: float, thresholds: list) -> str:
     """Map a numeric score to a qualitative level."""
