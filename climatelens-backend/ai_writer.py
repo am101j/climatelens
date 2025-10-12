@@ -117,9 +117,33 @@ class AIWriter:
                 ],
                 temperature=0.1
             )
-            output_text = response.choices[0].message.content
+            output_text = response.choices[0].message.content.strip()
+            
+            # Handle Groq's thinking tags
+            if '<think>' in output_text and '</think>' in output_text:
+                # Extract content after </think>
+                think_end = output_text.find('</think>')
+                output_text = output_text[think_end + 8:].strip()
+            
+            # Find the JSON object (starts with { and ends with })
+            start_idx = output_text.find('{')
+            if start_idx != -1:
+                # Find the matching closing brace
+                brace_count = 0
+                end_idx = -1
+                for i in range(start_idx, len(output_text)):
+                    if output_text[i] == '{':
+                        brace_count += 1
+                    elif output_text[i] == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            end_idx = i
+                            break
+                if end_idx != -1:
+                    output_text = output_text[start_idx:end_idx + 1]
+            
             logging.info("Groq response received.")
-            return output_text
+            return output_text.strip()
         except Exception as e:
             logging.error(f"Groq API call failed: {e}")
             raise
