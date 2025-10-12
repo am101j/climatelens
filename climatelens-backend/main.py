@@ -11,6 +11,11 @@ load_dotenv()
 
 app = FastAPI(title="ClimateLens API")
 
+# ------------------- Root Endpoint -------------------
+@app.get("/")
+async def root():
+    return {"status": "ok", "message": "Welcome to ClimateLens API"}
+
 # ------------------- CORS Setup -------------------
 origins = [
     "http://localhost:5173",  # Vite frontend
