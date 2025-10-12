@@ -16,6 +16,7 @@ origins = [
     "http://localhost:5173",  # Vite frontend
     "https://climatelens.vercel.app",
     "http://localhost:8080",
+    "http://localhost:8081",  # Current frontend port
     "http://127.0.0.1:8080",
 ]
 
@@ -39,15 +40,28 @@ class ContactRequest(BaseModel):
 # ------------------- Report Preview -------------------
 @app.post("/report/preview", response_model=ClimatePreview)
 async def get_preview(request: AddressRequest):
-    # Using the new function that calls the real API
-    return await fetch_climate_preview(request.address)
+    print(f"[PREVIEW] Starting preview for address: {request.address}")
+    try:
+        result = await fetch_climate_preview(request.address)
+        print(f"[PREVIEW] Preview generated successfully for: {request.address}")
+        return result
+    except Exception as e:
+        print(f"[PREVIEW ERROR] Failed to generate preview: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ------------------- Download PDF -------------------
 @app.get("/report/download")
 async def download_report(address: str):
+    print(f"[DOWNLOAD] Starting download for address: {address}")
     try:
         pdf_buffer = await generate_pdf_report_service(address)
+        print(f"[DOWNLOAD] PDF generated successfully for: {address}")
     except Exception as e:
+        print(f"[DOWNLOAD ERROR] Failed to generate PDF: {str(e)}")
+        import traceback
+        traceback.print_exc()
         # Catch *real* cause and forward it to frontend
         raise HTTPException(status_code=500, detail=str(e))
     

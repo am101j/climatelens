@@ -1,11 +1,11 @@
 import logging
 import json
 import os
-from openai import OpenAI
+from groq import Groq
 
 logging.basicConfig(level=logging.INFO)
 
-DEFAULT_MODEL = "gpt-5"
+DEFAULT_MODEL = "qwen/qwen3-32b"
 
 SYSTEM_PROMPT = """
 You are a world-class climate-risk and ESG consultant producing reports for high-value residential properties.
@@ -104,34 +104,36 @@ Key Data:
 """
 
 class AIWriter:
-    def __init__(self, openai_api_key: str = None):
-        self.client = OpenAI(api_key=openai_api_key or os.environ.get("OPENAI_API_KEY"))
+    def __init__(self, groq_api_key: str = None):
+        self.client = Groq(api_key=groq_api_key or os.environ.get("GROQ_API_KEY"))
 
-    def _call_openai(self, prompt: str) -> str:
-        logging.info("Calling GPT-5 API...")
+    def _call_groq(self, prompt: str) -> str:
+        logging.info("Calling Groq API...")
         try:
-            response = self.client.responses.create(
+            response = self.client.chat.completions.create(
                 model=DEFAULT_MODEL,
-                tools=[{"type": "web_search_preview"}],
-                input=prompt
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1
             )
-            output_text = response.output_text
-            logging.info("GPT-5 response received.")
+            output_text = response.choices[0].message.content
+            logging.info("Groq response received.")
             return output_text
         except Exception as e:
-            logging.error(f"OpenAI API call failed: {e}")
+            logging.error(f"Groq API call failed: {e}")
             raise
 
     def generate_sections(self, lat, lon, address, risk_score, flood_zone, wildfire_now, **kwargs) -> dict:
       prompt = _build_prompt(lat, lon, address, risk_score, flood_zone, wildfire_now, **kwargs)
-      raw_output = self._call_openai(prompt)
+      raw_output = self._call_groq(prompt)
 
       try:
           parsed_json = json.loads(raw_output)
-          logging.info("GPT-5 JSON parsed successfully.")
+          logging.info("Groq JSON parsed successfully.")
       except json.JSONDecodeError as e:
           logging.error(f"Failed to parse JSON: {e}\nRaw output:\n{raw_output}")
-          raise ValueError("GPT-5 returned invalid JSON") from e
+          raise ValueError("Groq returned invalid JSON") from e
 
       # Validate top-level sections and subsections
       required_sections = ["executive_summary", "market_analysis", "climate_and_esg_risks", "final_verdict"]
@@ -159,6 +161,5 @@ class AIWriter:
                           used_charts.add(c)
                   sub["charts"] = new_charts
 
-      logging.info("GPT-5 JSON validated successfully with unique charts across subsections.")
+      logging.info("Groq JSON validated successfully with unique charts across subsections.")
       return parsed_json
-
